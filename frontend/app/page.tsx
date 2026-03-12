@@ -96,16 +96,21 @@ export default function FlotaPage() {
     fetchViajes();
     const interval = setInterval(fetchViajes, 8000);
 
-    // SSE para actualizaciones inmediatas
-    const es = new EventSource("/api/stream");
-    es.onmessage = (e) => {
-      const data = JSON.parse(e.data);
-      if (data.type === "nuevo_evento") fetchViajes();
+    // SSE con reconexión automática
+    let es: EventSource;
+    const connectSSE = () => {
+      es = new EventSource("/api/stream");
+      es.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        if (data.type === "nuevo_evento") fetchViajes();
+      };
+      es.onerror = () => { es.close(); setTimeout(connectSSE, 3000); };
     };
+    connectSSE();
 
     return () => {
       clearInterval(interval);
-      es.close();
+      es?.close();
     };
   }, [fetchViajes]);
 

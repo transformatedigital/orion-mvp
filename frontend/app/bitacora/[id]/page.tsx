@@ -20,6 +20,7 @@ import {
   FileX,
   MessageSquare,
   Satellite,
+  RefreshCw,
 } from "lucide-react";
 
 interface Viaje {
@@ -78,27 +79,46 @@ const ESTATUS_COLOR: Record<string, string> = {
   completado: "bg-slate-100 text-slate-700",
 };
 
+const REFRESH_INTERVAL = 20;
+
 export default function BitacoraPage() {
   const { id } = useParams();
   const [data, setData] = useState<{ viaje: Viaje; eventos: Evento[] } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [countdown, setCountdown] = useState(REFRESH_INTERVAL);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   useEffect(() => {
     const load = () =>
       fetch(`/api/viajes/${id}`)
         .then((r) => r.json())
-        .then(setData)
+        .then((d) => { setData(d); setLastUpdate(new Date()); setCountdown(REFRESH_INTERVAL); })
         .finally(() => setLoading(false));
 
     load();
 
-    const sse = new EventSource("/api/stream");
-    sse.onmessage = (e) => {
-      const d = JSON.parse(e.data);
-      if (d.type === "nuevo_evento" && d.viaje_id === id) load();
-    };
+    // Polling cada 20s
+    const poll = setInterval(load, REFRESH_INTERVAL * 1000);
 
-    return () => sse.close();
+    // Countdown visual
+    const tick = setInterval(() => setCountdown((c) => (c <= 1 ? REFRESH_INTERVAL : c - 1)), 1000);
+
+    // SSE con reconexión automática
+    let sse: EventSource;
+    const connectSSE = () => {
+      sse = new EventSource("/api/stream");
+      sse.onmessage = (e) => {
+        const d = JSON.parse(e.data);
+        if (d.type === "nuevo_evento" && d.viaje_id === id) load();
+      };
+      sse.onerror = () => {
+        sse.close();
+        setTimeout(connectSSE, 3000);
+      };
+    };
+    connectSSE();
+
+    return () => { clearInterval(poll); clearInterval(tick); sse?.close(); };
   }, [id]);
 
   if (loading) {
@@ -124,14 +144,30 @@ export default function BitacoraPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Back */}
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 mb-4 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Flota
-      </Link>
+      {/* Back + refresh */}
+      <div className="flex items-center justify-between mb-4">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Flota
+        </Link>
+        <button
+          onClick={() => {
+            setLoading(true);
+            fetch(`/api/viajes/${id}`).then(r => r.json()).then(d => {
+              setData(d); setLastUpdate(new Date()); setCountdown(REFRESH_INTERVAL);
+            }).finally(() => setLoading(false));
+          }}
+          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-blue-600 transition-colors"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+          <span className="tabular-nums">
+            {loading ? "Actualizando..." : `Actualiza en ${countdown}s`}
+          </span>
+        </button>
+      </div>
 
       {/* Viaje Header */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 mb-4">
