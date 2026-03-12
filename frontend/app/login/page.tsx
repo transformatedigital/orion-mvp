@@ -1,0 +1,138 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+
+export default function LoginPage() {
+  const [usuario, setUsuario] = useState("");
+  const [contrasena, setContrasena] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    setTimeout(() => {
+      if (usuario.toLowerCase() === "orion" && contrasena === "orion") {
+        document.cookie = "orion_auth=true; path=/; max-age=86400; SameSite=Lax";
+        router.push("/dashboard");
+      } else {
+        setError("Usuario o contraseña incorrectos");
+        setLoading(false);
+      }
+    }, 600);
+  };
+
+  return (
+    <div
+      className="min-h-screen relative flex items-center overflow-hidden"
+      style={{ backgroundImage: "url('/login-bg.png')", backgroundSize: "cover", backgroundPosition: "center" }}
+    >
+
+      {/* Overlay oscuro para legibilidad del formulario */}
+      <div className="absolute inset-0 bg-black/55" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+
+      {/* ── Formulario ── */}
+      <div className="relative z-10 w-full max-w-xs mx-6 sm:mx-12 md:mx-20">
+
+        {/* Logo */}
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-14 h-14 bg-blue-700 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-blue-900/50">
+            <svg viewBox="0 0 40 40" className="w-9 h-9" fill="none">
+              <rect x="4" y="4" width="32" height="32" rx="6" stroke="#60a5fa" strokeWidth="2.5" />
+              <path d="M12 20 L20 12 L28 20 L20 28 Z" stroke="white" strokeWidth="2" fill="none" />
+              <circle cx="20" cy="20" r="3" fill="#60a5fa" />
+            </svg>
+          </div>
+          <div className="leading-none">
+            <p className="text-white font-black text-3xl tracking-tight">ORION</p>
+            <p className="text-blue-400 font-black text-3xl tracking-tight -mt-1">CRYO</p>
+          </div>
+        </div>
+        <p className="text-blue-400/70 text-[10px] font-bold tracking-[0.3em] mb-8 ml-1">
+          CALIDEZ, BAJO CERO
+        </p>
+
+        <h2 className="text-white font-black text-xl tracking-widest mb-6">
+          INICIO DE SESIÓN
+        </h2>
+
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="text-cyan-400 text-[11px] font-bold tracking-widest block mb-1.5">
+              USUARIO
+            </label>
+            <input
+              type="text"
+              value={usuario}
+              onChange={(e) => setUsuario(e.target.value)}
+              placeholder="Tu usuario o email"
+              autoComplete="username"
+              className="w-full bg-white/8 text-white placeholder-white/30 px-4 py-3 rounded-lg border border-white/15 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 outline-none text-sm transition backdrop-blur-sm"
+              style={{ background: "rgba(255,255,255,0.06)" }}
+            />
+          </div>
+
+          <div>
+            <label className="text-cyan-400 text-[11px] font-bold tracking-widest block mb-1.5">
+              CONTRASEÑA
+            </label>
+            <div className="relative">
+              <input
+                type={showPass ? "text" : "password"}
+                value={contrasena}
+                onChange={(e) => setContrasena(e.target.value)}
+                placeholder="Tu contraseña"
+                autoComplete="current-password"
+                className="w-full bg-white/8 text-white placeholder-white/30 px-4 py-3 pr-11 rounded-lg border border-white/15 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 outline-none text-sm transition backdrop-blur-sm"
+                style={{ background: "rgba(255,255,255,0.06)" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPass(!showPass)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition"
+              >
+                {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <p className="text-red-400 text-xs font-medium bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || !usuario || !contrasena}
+            className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-3 rounded-lg tracking-[0.2em] text-sm transition-all shadow-lg shadow-blue-900/40 flex items-center justify-center gap-2 mt-2"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                VERIFICANDO...
+              </>
+            ) : (
+              "ACCEDER"
+            )}
+          </button>
+        </form>
+
+        <p className="text-[11px] font-black tracking-[0.25em] mt-10">
+          <span className="text-cyan-400">CALIDEZ,</span>{" "}
+          <span className="text-blue-500">BAJO CERO</span>
+        </p>
+      </div>
+
+      {/* Destello inferior */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
+    </div>
+  );
+}
