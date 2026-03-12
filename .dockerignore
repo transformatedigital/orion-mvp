@@ -1,0 +1,9 @@
+backend/__pycache__/
+backend/*.pyc
+backend/orion.db
+frontend/node_modules/
+frontend/.next/
+.git/
+*.md
+render.yaml
+start.sh
