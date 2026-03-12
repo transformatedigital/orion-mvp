@@ -4,8 +4,8 @@ import ConditionalNavbar from "@/components/ConditionalNavbar";
 import ConditionalMain from "@/components/ConditionalMain";
 
 export const metadata: Metadata = {
-  title: "Orión — Dashboard Operativo",
-  description: "Plataforma de monitoreo de flota Orión Logística",
+  title: "Orión AI Monitor",
+  description: "Plataforma de monitoreo de flota Orión AI Monitor",
 };
 
 export const viewport: Viewport = {

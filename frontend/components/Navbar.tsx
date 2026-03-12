@@ -32,7 +32,7 @@ export default function Navbar() {
             <span className="text-white font-bold text-lg tracking-tight hidden sm:block">
               Orión
             </span>
-            <span className="text-orange-300 text-xs hidden sm:block">Logística</span>
+            <span className="text-orange-300 text-xs hidden sm:block">AI Monitor</span>
           </Link>
 
           {/* Nav links */}
