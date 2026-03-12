@@ -61,6 +61,13 @@ EVENTOS_KEYWORDS: dict[str, list[str]] = {
         "saliendo de destino", "ya descargué", "descargado",
         "listo para salir", "terminé descarga", "descarga completa",
         "ya descargue",
+        # Entrega
+        "ya entregué", "ya entregue", "entregué", "entregue",
+        "entrega hecha", "entrega completa", "entregado", "entregada",
+        "ya entregué la carga", "ya entregue la carga",
+        "hice la entrega", "se hizo la entrega", "entrega realizada",
+        "deje la carga", "dejé la carga", "dejamos la carga",
+        "ya dejé", "ya deje",
         # Informal
         "ya baje la carga", "ya baje carga", "baje carga", "listo saliendo", "termino descarg",
         "saliendo destino", "destino",
@@ -68,7 +75,7 @@ EVENTOS_KEYWORDS: dict[str, list[str]] = {
         "todo listo pa regresar",
         # Faltas
         "saliendo detino", "ya degarge", "degargado",
-        "listo pa slr", "termine degarga",
+        "listo pa slr", "termine degarga", "ya entregue la karga",
         # Jerga
         "carga abajo", "10-22 saliendo destino",
     ],
