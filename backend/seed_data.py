@@ -77,6 +77,18 @@ def seed_database(db: Session):
             "estatus": "en_ruta",
             "fecha_inicio": now - timedelta(minutes=45),
         },
+        {
+            "viaje_id": "ORI-006",
+            "unidad": "Unidad 6",
+            "placa": "CFO-2026",
+            "operador": "Cesar Fonseca",
+            "origen": "CDMX - Bodega Central",
+            "destino": "Monterrey, NL",
+            "cliente": "Demo Orión",
+            "tipo_carga": "Carga general",
+            "estatus": "en_ruta",
+            "fecha_inicio": now - timedelta(minutes=10),
+        },
     ]
 
     for v in viajes_data:
@@ -194,6 +206,15 @@ def seed_database(db: Session):
             "fuente": "whatsapp", "operador": "Sergio Pérez Ramos", "unidad": "Unidad 5",
             "payload": json.dumps({"mensaje": "ya saliendo, todo en orden"}),
         },
+
+        # ORI-006: Cesar Fonseca, CDMX → Monterrey (demo WhatsApp)
+        {
+            "viaje_id": "ORI-006", "tipo_evento": "salida_origen",
+            "timestamp": now - timedelta(minutes=10),
+            "descripcion": "Operador confirma salida de origen",
+            "fuente": "whatsapp", "operador": "Cesar Fonseca", "unidad": "Unidad 6",
+            "payload": json.dumps({"mensaje": "saliendo a Monterrey"}),
+        },
     ]
 
     for e in eventos:
@@ -204,7 +225,7 @@ def seed_database(db: Session):
         {
             "telefono": "whatsapp:+821026311719",
             "nombre": "Cesar Fonseca",
-            "viaje_id_activo": "ORI-001",
+            "viaje_id_activo": "ORI-006",
         },
     ]
     for op in operadores_wa:
