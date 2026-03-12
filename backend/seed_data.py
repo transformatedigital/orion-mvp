@@ -89,6 +89,18 @@ def seed_database(db: Session):
             "estatus": "en_ruta",
             "fecha_inicio": now - timedelta(minutes=10),
         },
+        {
+            "viaje_id": "ORI-007",
+            "unidad": "Unidad 7",
+            "placa": "UGI-5521",
+            "operador": "Ulises Gil",
+            "origen": "CDMX - Bodega Central",
+            "destino": "Veracruz, VER",
+            "cliente": "Distribuidora del Golfo SA",
+            "tipo_carga": "Carga general",
+            "estatus": "en_ruta",
+            "fecha_inicio": now - timedelta(minutes=5),
+        },
     ]
 
     for v in viajes_data:
@@ -102,7 +114,7 @@ def seed_database(db: Session):
             "timestamp": now - timedelta(hours=3),
             "descripcion": "Operador confirma salida de origen",
             "fuente": "whatsapp", "operador": "Juan Manuel López Reyes", "unidad": "Unidad 1",
-            "payload": json.dumps({"mensaje": "ya saliendo de cuautitlan"}),
+            "payload": json.dumps({"mensaje_original": "ya saliendo de cuautitlan"}),
         },
         {
             "viaje_id": "ORI-001", "tipo_evento": "cumplimiento_check",
@@ -110,7 +122,7 @@ def seed_database(db: Session):
             "descripcion": "Reporte de estatus en ruta: circulando en autopista México-Querétaro, sin novedad",
             "fuente": "whatsapp", "operador": "Juan Manuel López Reyes", "unidad": "Unidad 1",
             "lat": 20.12, "lng": -99.88,
-            "payload": json.dumps({"mensaje": "todo bien circulando en autopista sin novedad"}),
+            "payload": json.dumps({"mensaje_original": "todo bien circulando en autopista sin novedad"}),
         },
         {
             "viaje_id": "ORI-001", "tipo_evento": "detencion_prolongada",
@@ -118,7 +130,7 @@ def seed_database(db: Session):
             "descripcion": "Detención reportada: retención en caseta Palmillas por revisión",
             "fuente": "whatsapp", "operador": "Juan Manuel López Reyes", "unidad": "Unidad 1",
             "lat": 20.38, "lng": -99.65,
-            "payload": json.dumps({"mensaje": "detenido en caseta por revisión"}),
+            "payload": json.dumps({"mensaje_original": "detenido en caseta por revisión"}),
         },
 
         # ORI-002: Con incidencia CDMX → Guadalajara
@@ -127,7 +139,7 @@ def seed_database(db: Session):
             "timestamp": now - timedelta(hours=6),
             "descripcion": "Operador confirma salida de origen",
             "fuente": "whatsapp", "operador": "Carlos Hernández Vega", "unidad": "Unidad 2",
-            "payload": json.dumps({"mensaje": "saliendo de bodega en camino"}),
+            "payload": json.dumps({"mensaje_original": "saliendo de bodega en camino"}),
         },
         {
             "viaje_id": "ORI-002", "tipo_evento": "cumplimiento_check",
@@ -142,7 +154,7 @@ def seed_database(db: Session):
             "descripcion": "⚠️ INCIDENCIA reportada: llanta ponchada, unidad detenida en acotamiento km 47 libramiento Palmillas",
             "fuente": "whatsapp", "operador": "Carlos Hernández Vega", "unidad": "Unidad 2",
             "lat": 20.05, "lng": -100.21,
-            "payload": json.dumps({"mensaje": "incidencia llanta ponchada, detenido en acotamiento", "prioridad": "alta"}),
+            "payload": json.dumps({"mensaje_original": "incidencia llanta ponchada, detenido en acotamiento", "prioridad": "alta"}),
         },
         {
             "viaje_id": "ORI-002", "tipo_evento": "evidencia",
@@ -195,7 +207,7 @@ def seed_database(db: Session):
             "timestamp": now - timedelta(hours=1, minutes=30),
             "descripcion": "Operador confirma salida de origen",
             "fuente": "whatsapp", "operador": "Miguel Ángel Torres Fuentes", "unidad": "Unidad 4",
-            "payload": json.dumps({"mensaje": "saliendo rumbo a SLP"}),
+            "payload": json.dumps({"mensaje_original": "saliendo rumbo a SLP"}),
         },
 
         # ORI-005: Sergio Pérez Ramos, Cuautitlán → Puebla
@@ -204,7 +216,7 @@ def seed_database(db: Session):
             "timestamp": now - timedelta(minutes=45),
             "descripcion": "Operador confirma salida de origen",
             "fuente": "whatsapp", "operador": "Sergio Pérez Ramos", "unidad": "Unidad 5",
-            "payload": json.dumps({"mensaje": "ya saliendo, todo en orden"}),
+            "payload": json.dumps({"mensaje_original": "ya saliendo, todo en orden"}),
         },
 
         # ORI-006: Cesar Fonseca, CDMX → Monterrey (demo WhatsApp)
@@ -213,7 +225,16 @@ def seed_database(db: Session):
             "timestamp": now - timedelta(minutes=10),
             "descripcion": "Operador confirma salida de origen",
             "fuente": "whatsapp", "operador": "Cesar Fonseca", "unidad": "Unidad 6",
-            "payload": json.dumps({"mensaje": "saliendo a Monterrey"}),
+            "payload": json.dumps({"mensaje_original": "saliendo a Monterrey"}),
+        },
+
+        # ORI-007: Ulises Gil, CDMX → Veracruz (demo cliente)
+        {
+            "viaje_id": "ORI-007", "tipo_evento": "salida_origen",
+            "timestamp": now - timedelta(minutes=5),
+            "descripcion": "Operador confirma salida de origen",
+            "fuente": "whatsapp", "operador": "Ulises Gil", "unidad": "Unidad 7",
+            "payload": json.dumps({"mensaje_original": "saliendo a Veracruz"}),
         },
     ]
 
@@ -226,6 +247,11 @@ def seed_database(db: Session):
             "telefono": "whatsapp:+821026311719",
             "nombre": "Cesar Fonseca",
             "viaje_id_activo": "ORI-006",
+        },
+        {
+            "telefono": "whatsapp:+525554378221",
+            "nombre": "Ulises Gil",
+            "viaje_id_activo": "ORI-007",
         },
     ]
     for op in operadores_wa:
