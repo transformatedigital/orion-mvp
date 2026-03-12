@@ -94,11 +94,18 @@ def list_viajes(db: Session = Depends(get_db)):
             .filter(EventoViaje.viaje_id == v.viaje_id)
             .count()
         )
+        op_wa = db.query(OperadorWhatsapp).filter(
+            OperadorWhatsapp.viaje_id_activo == v.viaje_id,
+            OperadorWhatsapp.activo == True,
+        ).first()
+        telefono = op_wa.telefono.replace("whatsapp:", "") if op_wa else None
+
         result.append({
             "viaje_id": v.viaje_id,
             "unidad": v.unidad,
             "placa": v.placa,
             "operador": v.operador,
+            "telefono": telefono,
             "origen": v.origen,
             "destino": v.destino,
             "cliente": v.cliente,

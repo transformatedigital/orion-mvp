@@ -20,6 +20,7 @@ interface Viaje {
   unidad: string;
   placa: string;
   operador: string;
+  telefono: string | null;
   origen: string;
   destino: string;
   cliente: string;
@@ -195,6 +196,9 @@ export default function FlotaPage() {
                           <StatusBadge estatus={viaje.estatus} />
                         </div>
                         <p className="text-sm text-slate-600 truncate mt-0.5">{viaje.operador}</p>
+                        {viaje.telefono && (
+                          <p className="text-xs text-slate-400 mt-0.5">{viaje.telefono}</p>
+                        )}
                         <div className="flex items-center gap-1 mt-1 text-xs text-slate-500">
                           <MapPin className="w-3 h-3 shrink-0" />
                           <span className="truncate">{viaje.origen}</span>

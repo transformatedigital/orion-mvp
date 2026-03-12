@@ -6,7 +6,7 @@ Rutas reales México: Cuautitlán → Querétaro, CDMX → Guadalajara, Monterre
 import json
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
-from models import Viaje, EventoViaje
+from models import Viaje, EventoViaje, OperadorWhatsapp
 
 
 def seed_database(db: Session):
@@ -198,6 +198,21 @@ def seed_database(db: Session):
 
     for e in eventos:
         db.add(EventoViaje(**e))
+
+    # Operadores WhatsApp registrados
+    operadores_wa = [
+        {
+            "telefono": "whatsapp:+821026311719",
+            "nombre": "Cesar Fonseca",
+            "viaje_id_activo": "ORI-001",
+        },
+    ]
+    for op in operadores_wa:
+        existe = db.query(OperadorWhatsapp).filter(
+            OperadorWhatsapp.telefono == op["telefono"]
+        ).first()
+        if not existe:
+            db.add(OperadorWhatsapp(**op))
 
     db.commit()
     print("✅ Datos demo Orión cargados correctamente")
