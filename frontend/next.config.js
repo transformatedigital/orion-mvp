@@ -6,6 +6,10 @@ const nextConfig = {
         source: "/api/:path*",
         destination: `${process.env.API_URL || "http://localhost:8000"}/api/:path*`,
       },
+      {
+        source: "/webhook/:path*",
+        destination: `${process.env.API_URL || "http://localhost:8000"}/webhook/:path*`,
+      },
     ];
   },
 };
