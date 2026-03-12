@@ -31,33 +31,24 @@ export default function LoginPage() {
   return (
     <div
       className="min-h-screen relative flex items-center overflow-hidden"
-      style={{ backgroundImage: "url('/login-bg.png')", backgroundSize: "cover", backgroundPosition: "center" }}
+      style={{ backgroundImage: "url('/logobienvenida2.png')", backgroundSize: "cover", backgroundPosition: "center" }}
     >
 
       {/* Overlay oscuro para legibilidad del formulario */}
-      <div className="absolute inset-0 bg-black/55" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+      <div className="absolute inset-0 bg-black/50" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
 
       {/* ── Formulario ── */}
       <div className="relative z-10 w-full max-w-xs mx-6 sm:mx-12 md:mx-20">
 
         {/* Logo */}
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-14 h-14 bg-blue-700 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-blue-900/50">
-            <svg viewBox="0 0 40 40" className="w-9 h-9" fill="none">
-              <rect x="4" y="4" width="32" height="32" rx="6" stroke="#60a5fa" strokeWidth="2.5" />
-              <path d="M12 20 L20 12 L28 20 L20 28 Z" stroke="white" strokeWidth="2" fill="none" />
-              <circle cx="20" cy="20" r="3" fill="#60a5fa" />
-            </svg>
-          </div>
-          <div className="leading-none">
-            <p className="text-white font-black text-3xl tracking-tight">ORION</p>
-            <p className="text-blue-400 font-black text-3xl tracking-tight -mt-1">CRYO</p>
-          </div>
+        <div className="mb-8">
+          <img
+            src="/logobienvenida.png"
+            alt="Orion Cryo"
+            className="w-56 object-contain drop-shadow-lg"
+          />
         </div>
-        <p className="text-blue-400/70 text-[10px] font-bold tracking-[0.3em] mb-8 ml-1">
-          CALIDEZ, BAJO CERO
-        </p>
 
         <h2 className="text-white font-black text-xl tracking-widest mb-6">
           INICIO DE SESIÓN
@@ -125,9 +116,8 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-[11px] font-black tracking-[0.25em] mt-10">
-          <span className="text-cyan-400">CALIDEZ,</span>{" "}
-          <span className="text-blue-500">BAJO CERO</span>
+        <p className="text-white/30 text-[10px] tracking-widest mt-10">
+          PLATAFORMA OPERATIVA v1.0
         </p>
       </div>
 
