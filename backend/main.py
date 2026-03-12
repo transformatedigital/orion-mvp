@@ -13,15 +13,15 @@ def ts(dt: datetime | None) -> str | None:
         return None
     return dt.isoformat() + "Z"
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from database import Base, engine, get_db
-from models import EventoViaje, Viaje
+from models import EventoViaje, OperadorWhatsapp, Viaje
 from seed_data import seed_database
 from services.parser import parse_whatsapp_message
 from services.agent import agent_stream
@@ -354,3 +354,151 @@ async def chat(req: ChatRequest, db: Session = Depends(get_db)):
             "X-Accel-Buffering": "no",
         },
     )
+
+
+# ─── WhatsApp Webhook (Twilio) ──────────────────────────────────────────────
+
+def _twiml(mensaje: str) -> Response:
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<Response><Message>{mensaje}</Message></Response>"""
+    return Response(content=xml, media_type="application/xml")
+
+
+@app.post("/webhook/whatsapp")
+async def whatsapp_webhook(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Recibe mensajes de WhatsApp vía Twilio y los procesa."""
+    form = await request.form()
+    from_num = form.get("From", "")      # e.g. "whatsapp:+521234567890"
+    body = form.get("Body", "").strip()
+
+    if not body:
+        return _twiml("No entendí el mensaje. Escribe algo 😊")
+
+    # Buscar operador registrado por su número
+    operador_reg = db.query(OperadorWhatsapp).filter(
+        OperadorWhatsapp.telefono == from_num,
+        OperadorWhatsapp.activo == True,
+    ).first()
+
+    if not operador_reg:
+        return _twiml(
+            "👋 Hola, no estás registrado en Orión. "
+            "Contacta a tu supervisor para que te den de alta."
+        )
+
+    viaje_id = operador_reg.viaje_id_activo
+    if not viaje_id:
+        return _twiml("No tienes un viaje activo asignado. Contacta a tu supervisor.")
+
+    viaje = db.query(Viaje).filter(Viaje.viaje_id == viaje_id).first()
+    if not viaje:
+        return _twiml("No encontré tu viaje activo. Contacta a tu supervisor.")
+
+    # Historial para contexto del parser
+    historial = [
+        e.tipo_evento for e in
+        db.query(EventoViaje.tipo_evento)
+        .filter(EventoViaje.viaje_id == viaje_id)
+        .order_by(EventoViaje.id.asc())
+        .all()
+    ]
+
+    parsed = parse_whatsapp_message(
+        body, viaje_id,
+        operador_reg.nombre,
+        viaje.unidad,
+        historial=historial,
+    )
+
+    evento = EventoViaje(
+        viaje_id=viaje_id,
+        tipo_evento=parsed["tipo_evento"],
+        descripcion=parsed["descripcion"],
+        payload=json.dumps({"mensaje_original": body, "fuente": from_num}),
+        fuente="whatsapp",
+        operador=operador_reg.nombre,
+        unidad=viaje.unidad,
+    )
+    db.add(evento)
+
+    # Actualizar estatus del viaje
+    tipo = parsed["tipo_evento"]
+    if tipo == "incidencia":
+        viaje.estatus = "con_incidencia"
+    elif tipo == "detencion_prolongada":
+        viaje.estatus = "detenido"
+    elif tipo == "llegada_destino":
+        viaje.estatus = "en_destino"
+    elif tipo in ("fin_viaje", "salida_destino") and viaje.estatus == "en_destino":
+        viaje.estatus = "completado"
+        viaje.fecha_fin = datetime.utcnow()
+    elif tipo in ("salida_origen", "retoma_ruta"):
+        viaje.estatus = "en_ruta"
+
+    db.commit()
+    db.refresh(evento)
+
+    await _broadcast({
+        "type": "nuevo_evento",
+        "viaje_id": viaje_id,
+        "estatus_viaje": viaje.estatus,
+        "evento": {
+            "tipo_evento": evento.tipo_evento,
+            "descripcion": evento.descripcion,
+            "timestamp": ts(evento.timestamp),
+            "unidad": evento.unidad,
+            "operador": evento.operador,
+        },
+    })
+
+    return _twiml(parsed["respuesta"])
+
+
+# ─── Gestión de operadores WhatsApp ─────────────────────────────────────────
+
+class OperadorRequest(BaseModel):
+    telefono: str       # formato: +521234567890
+    nombre: str
+    viaje_id: str
+
+
+@app.post("/api/operadores")
+def registrar_operador(req: OperadorRequest, db: Session = Depends(get_db)):
+    """Registra o actualiza un operador con su número de WhatsApp."""
+    telefono_fmt = f"whatsapp:{req.telefono}" if not req.telefono.startswith("whatsapp:") else req.telefono
+
+    existing = db.query(OperadorWhatsapp).filter(
+        OperadorWhatsapp.telefono == telefono_fmt
+    ).first()
+
+    if existing:
+        existing.nombre = req.nombre
+        existing.viaje_id_activo = req.viaje_id
+        existing.activo = True
+    else:
+        db.add(OperadorWhatsapp(
+            telefono=telefono_fmt,
+            nombre=req.nombre,
+            viaje_id_activo=req.viaje_id,
+        ))
+
+    db.commit()
+    return {"success": True, "mensaje": f"Operador {req.nombre} registrado en {req.viaje_id}"}
+
+
+@app.get("/api/operadores")
+def listar_operadores(db: Session = Depends(get_db)):
+    """Lista todos los operadores registrados con WhatsApp."""
+    ops = db.query(OperadorWhatsapp).filter(OperadorWhatsapp.activo == True).all()
+    return [
+        {
+            "telefono": o.telefono,
+            "nombre": o.nombre,
+            "viaje_id_activo": o.viaje_id_activo,
+            "creado_en": ts(o.creado_en),
+        }
+        for o in ops
+    ]

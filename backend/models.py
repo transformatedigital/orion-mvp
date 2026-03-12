@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float, Text
+from sqlalchemy import Column, Integer, String, DateTime, Float, Text, Boolean
 from database import Base
 from datetime import datetime
 
@@ -36,3 +36,15 @@ class EventoViaje(Base):
     fuente = Column(String, default="whatsapp")
     operador = Column(String, nullable=True)
     unidad = Column(String, nullable=True)
+
+
+class OperadorWhatsapp(Base):
+    """Mapeo número WhatsApp → operador/viaje activo."""
+    __tablename__ = "operadores_whatsapp"
+
+    id = Column(Integer, primary_key=True, index=True)
+    telefono = Column(String, unique=True, index=True)   # e.g. "whatsapp:+521234567890"
+    nombre = Column(String)
+    viaje_id_activo = Column(String, nullable=True)       # ORI-001
+    activo = Column(Boolean, default=True)
+    creado_en = Column(DateTime, default=datetime.utcnow)
