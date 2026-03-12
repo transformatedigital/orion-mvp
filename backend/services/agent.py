@@ -40,6 +40,11 @@ ESTATUS DE VIAJE:
 TIPOS DE EVENTO: salida_origen, llegada_destino, salida_destino, fin_viaje,
 incidencia, detencion_prolongada, retoma_ruta, desvio_ruta, evidencia, cumplimiento_check
 
+DATOS DE EVENTOS: Cada evento puede tener un campo "mensaje_original" con el texto exacto
+que el operador escribió en WhatsApp. Cuando esté disponible, úsalo para dar detalles
+específicos (montos, nombres, lugares, situaciones exactas). Cita el mensaje original cuando
+aporte información relevante que no esté en la descripción.
+
 FORMATO DE RESPUESTA (MUY IMPORTANTE — se visualiza en celular):
 - NUNCA uses tablas markdown (no uses | para tablas)
 - Para listar unidades usa viñetas con este formato:
@@ -158,6 +163,17 @@ def tool_get_fleet_status(db: Session) -> dict:
     return {"total": len(result), "viajes": result}
 
 
+def _parse_mensaje_original(payload: str | None) -> str | None:
+    """Extrae el texto original del WhatsApp desde el payload JSON."""
+    if not payload:
+        return None
+    try:
+        p = json.loads(payload)
+        return p.get("mensaje_original") or p.get("Body") or None
+    except Exception:
+        return None
+
+
 def tool_get_trip_detail(viaje_id: str, db: Session) -> dict:
     viaje = db.query(Viaje).filter(Viaje.viaje_id == viaje_id).first()
     if not viaje:
@@ -186,6 +202,7 @@ def tool_get_trip_detail(viaje_id: str, db: Session) -> dict:
                 "descripcion": e.descripcion,
                 "timestamp": _fmt_ts(e.timestamp),
                 "fuente": e.fuente,
+                **({"mensaje_original": msg} if (msg := _parse_mensaje_original(e.payload)) else {}),
             }
             for e in eventos
         ],
@@ -210,6 +227,7 @@ def tool_get_incidents(dias: int, db: Session) -> dict:
                 "operador": e.operador,
                 "descripcion": e.descripcion,
                 "timestamp": _fmt_ts(e.timestamp),
+                **({"mensaje_original": msg} if (msg := _parse_mensaje_original(e.payload)) else {}),
             }
             for e in eventos
         ],
@@ -237,7 +255,12 @@ def tool_get_operator_status(nombre: str, db: Session) -> dict:
             "estatus": v.estatus,
             "fecha_inicio": _fmt_ts(v.fecha_inicio),
             "eventos_recientes": [
-                {"tipo": e.tipo_evento, "descripcion": e.descripcion, "timestamp": _fmt_ts(e.timestamp)}
+                {
+                    "tipo": e.tipo_evento,
+                    "descripcion": e.descripcion,
+                    "timestamp": _fmt_ts(e.timestamp),
+                    **({"mensaje_original": msg} if (msg := _parse_mensaje_original(e.payload)) else {}),
+                }
                 for e in eventos
             ],
         })
@@ -262,6 +285,7 @@ def tool_get_detentions(dias: int, db: Session) -> dict:
                 "operador": e.operador,
                 "descripcion": e.descripcion,
                 "timestamp": _fmt_ts(e.timestamp),
+                **({"mensaje_original": msg} if (msg := _parse_mensaje_original(e.payload)) else {}),
             }
             for e in eventos
         ],
@@ -288,6 +312,7 @@ def tool_search_events(inputs: dict, db: Session) -> dict:
                 "operador": e.operador,
                 "descripcion": e.descripcion,
                 "timestamp": _fmt_ts(e.timestamp),
+                **({"mensaje_original": msg} if (msg := _parse_mensaje_original(e.payload)) else {}),
             }
             for e in eventos
         ],
