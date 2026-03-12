@@ -242,6 +242,22 @@ export default function BitacoraPage() {
                         </span>
                       </div>
                       <p className="text-sm text-slate-700 leading-snug">{evento.descripcion}</p>
+                      {/* Foto de evidencia */}
+                      {evento.payload && (() => {
+                        try {
+                          const p = JSON.parse(evento.payload);
+                          if (p.media_url) return (
+                            <a href={`/api/media/${evento.id}`} target="_blank" rel="noopener noreferrer">
+                              <img
+                                src={`/api/media/${evento.id}`}
+                                alt="Evidencia"
+                                className="mt-2 rounded-lg max-w-[220px] border border-slate-200 shadow-sm hover:opacity-90 transition"
+                              />
+                            </a>
+                          );
+                        } catch {}
+                        return null;
+                      })()}
                       {evento.lat && evento.lng && (
                         <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
                           <MapPin className="w-3 h-3" />

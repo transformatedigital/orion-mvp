@@ -219,8 +219,8 @@ DESCRIPCIONES = {
 RESPUESTAS_BOT = {
     "salida_origen": "✅ Salida registrada. Buen viaje, monitoreo activo.",
     "llegada_destino": "✅ Llegada registrada. Notificando a administración.",
-    "salida_destino": "✅ Salida de destino registrada.",
-    "fin_viaje": "✅ Fin de viaje registrado. ¡Buen trabajo!",
+    "salida_destino": "📸 Entrega confirmada. Necesitamos foto de la firma del cliente para cerrar el viaje. ¡Mándala por favor! 👍",
+    "fin_viaje": "✅ Fin de viaje registrado. ¡Buen trabajo! 🚛",
     "incidencia": "🚨 Incidencia registrada. Monitorista notificado.",
     "detencion_prolongada": "⏱️ Detención registrada. Confirma causa cuando puedas.",
     "desvio_ruta": "📍 Cambio de ruta registrado.",

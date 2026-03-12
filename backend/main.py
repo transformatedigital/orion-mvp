@@ -1,7 +1,10 @@
 import asyncio
 import json
+import os
 from datetime import datetime, timezone
 from typing import Optional
+
+import httpx
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -380,8 +383,11 @@ async def whatsapp_webhook(
     form = await request.form()
     from_num = form.get("From", "")      # e.g. "whatsapp:+521234567890"
     body = form.get("Body", "").strip()
+    num_media = int(form.get("NumMedia", "0"))
+    media_url = form.get("MediaUrl0", None) if num_media > 0 else None
+    media_type = form.get("MediaContentType0", "image/jpeg") if num_media > 0 else None
 
-    if not body:
+    if not body and not media_url:
         return _twiml("No entendí el mensaje. Escribe algo 😊")
 
     # Buscar operador registrado por su número
@@ -413,18 +419,33 @@ async def whatsapp_webhook(
         .all()
     ]
 
-    parsed = parse_whatsapp_message(
-        body, viaje_id,
-        operador_reg.nombre,
-        viaje.unidad,
-        historial=historial,
-    )
+    # Si el operador mandó una foto, es evidencia directa
+    if media_url:
+        parsed = {
+            "tipo_evento": "evidencia",
+            "descripcion": "Evidencia fotográfica enviada por operador",
+            "respuesta": "✅ Foto guardada en bitácora. ¡Gracias! 📋",
+        }
+        payload_data = {
+            "mensaje_original": body or "[foto]",
+            "fuente": from_num,
+            "media_url": media_url,
+            "media_type": media_type,
+        }
+    else:
+        parsed = parse_whatsapp_message(
+            body, viaje_id,
+            operador_reg.nombre,
+            viaje.unidad,
+            historial=historial,
+        )
+        payload_data = {"mensaje_original": body, "fuente": from_num}
 
     evento = EventoViaje(
         viaje_id=viaje_id,
         tipo_evento=parsed["tipo_evento"],
         descripcion=parsed["descripcion"],
-        payload=json.dumps({"mensaje_original": body, "fuente": from_num}),
+        payload=json.dumps(payload_data),
         fuente="whatsapp",
         operador=operador_reg.nombre,
         unidad=viaje.unidad,
@@ -494,6 +515,38 @@ def registrar_operador(req: OperadorRequest, db: Session = Depends(get_db)):
 
     db.commit()
     return {"success": True, "mensaje": f"Operador {req.nombre} registrado en {req.viaje_id}"}
+
+
+@app.get("/api/media/{event_id}")
+async def get_media(event_id: int, db: Session = Depends(get_db)):
+    """Sirve la foto de evidencia almacenada en el evento."""
+    evento = db.query(EventoViaje).filter(EventoViaje.id == event_id).first()
+    if not evento or not evento.payload:
+        raise HTTPException(status_code=404, detail="No encontrado")
+
+    try:
+        payload = json.loads(evento.payload)
+    except Exception:
+        raise HTTPException(status_code=404, detail="Payload inválido")
+
+    media_url = payload.get("media_url")
+    if not media_url:
+        raise HTTPException(status_code=404, detail="Sin foto en este evento")
+
+    account_sid = os.getenv("TWILIO_ACCOUNT_SID", "")
+    auth_token = os.getenv("TWILIO_AUTH_TOKEN", "")
+
+    from fastapi.responses import StreamingResponse as SR
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            media_url,
+            auth=(account_sid, auth_token) if account_sid else None,
+        )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=502, detail="No se pudo obtener la imagen")
+
+    content_type = payload.get("media_type", resp.headers.get("content-type", "image/jpeg"))
+    return Response(content=resp.content, media_type=content_type)
 
 
 @app.get("/api/operadores")
