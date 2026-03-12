@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
@@ -29,24 +30,33 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      className="min-h-screen relative flex items-center overflow-hidden"
-      style={{ backgroundImage: "url('/logobienvenida2.png')", backgroundSize: "cover", backgroundPosition: "center" }}
-    >
+    <div className="min-h-screen relative flex items-center overflow-hidden">
 
-      {/* Overlay oscuro para legibilidad del formulario */}
+      {/* Fondo: camión Orion Cryo */}
+      <Image
+        src="/logobienvenida2.png"
+        alt=""
+        fill
+        priority
+        className="object-cover object-center"
+      />
+
+      {/* Overlays */}
       <div className="absolute inset-0 bg-black/50" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
 
       {/* ── Formulario ── */}
       <div className="relative z-10 w-full max-w-xs mx-6 sm:mx-12 md:mx-20">
 
         {/* Logo */}
         <div className="mb-8">
-          <img
+          <Image
             src="/logobienvenida.png"
             alt="Orion Cryo"
-            className="w-56 object-contain drop-shadow-lg"
+            width={240}
+            height={90}
+            priority
+            className="object-contain drop-shadow-lg"
           />
         </div>
 
@@ -65,7 +75,7 @@ export default function LoginPage() {
               onChange={(e) => setUsuario(e.target.value)}
               placeholder="Tu usuario o email"
               autoComplete="username"
-              className="w-full bg-white/8 text-white placeholder-white/30 px-4 py-3 rounded-lg border border-white/15 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 outline-none text-sm transition backdrop-blur-sm"
+              className="w-full text-white placeholder-white/30 px-4 py-3 rounded-lg border border-white/15 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 outline-none text-sm transition backdrop-blur-sm"
               style={{ background: "rgba(255,255,255,0.06)" }}
             />
           </div>
@@ -81,7 +91,7 @@ export default function LoginPage() {
                 onChange={(e) => setContrasena(e.target.value)}
                 placeholder="Tu contraseña"
                 autoComplete="current-password"
-                className="w-full bg-white/8 text-white placeholder-white/30 px-4 py-3 pr-11 rounded-lg border border-white/15 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 outline-none text-sm transition backdrop-blur-sm"
+                className="w-full text-white placeholder-white/30 px-4 py-3 pr-11 rounded-lg border border-white/15 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 outline-none text-sm transition backdrop-blur-sm"
                 style={{ background: "rgba(255,255,255,0.06)" }}
               />
               <button
