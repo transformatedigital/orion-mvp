@@ -537,7 +537,7 @@ async def get_media(event_id: int, db: Session = Depends(get_db)):
     auth_token = os.getenv("TWILIO_AUTH_TOKEN", "")
 
     from fastapi.responses import StreamingResponse as SR
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(follow_redirects=True) as client:
         resp = await client.get(
             media_url,
             auth=(account_sid, auth_token) if account_sid else None,
