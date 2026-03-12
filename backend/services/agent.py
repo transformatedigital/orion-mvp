@@ -346,7 +346,7 @@ async def agent_stream(
 
     for _ in range(8):  # máximo 8 iteraciones del loop agéntico
         async with client.messages.stream(
-            model="claude-opus-4-6",
+            model="claude-haiku-4-5-20251001",
             max_tokens=1024,
             system=SYSTEM_PROMPT,
             tools=TOOLS,
