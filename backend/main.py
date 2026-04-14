@@ -29,7 +29,7 @@ from seed_data import seed_database
 from services.parser import parse_whatsapp_message
 from services.agent import agent_stream
 
-# Base.metadata.create_all(bind=engine)  # Comentado - tablas ya existen
+Base.metadata.create_all(bind=engine)  # Crea tablas si no existen (SQLite en Cloud Run)
 
 app = FastAPI(title="Orión Logística — API MVP")
 
