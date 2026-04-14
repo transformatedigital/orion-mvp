@@ -29,7 +29,7 @@ from seed_data import seed_database
 from services.parser import parse_whatsapp_message
 from services.agent import agent_stream
 
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)  # Comentado - tablas ya existen
 
 app = FastAPI(title="Orión Logística — API MVP")
 
