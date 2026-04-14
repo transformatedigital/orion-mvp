@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitudes - Orión</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f3f4f6; color: #333; }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: #0f172a;
+            color: white;
+            overflow-y: auto;
+        }
+
+        .logo {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: #3b82f6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .logo-text { font-size: 18px; font-weight: bold; }
+        .logo-sub { font-size: 12px; opacity: 0.7; }
+
+        .menu-section {
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .section-title {
+            padding: 10px 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            opacity: 0.6;
+            letter-spacing: 1px;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            display: block;
+            color: white;
+            text-decoration: none;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3b82f6;
+        }
+
+        .menu-item.active {
+            background: rgba(245, 158, 11, 0.2);
+            border-left-color: #3b82f6;
+            color: #fbbf24;
+        }
+
+        .container { margin-left: 280px; max-width: none; padding: 20px; }
+        header { background: #0f172a; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        h1 { font-size: 28px; margin-bottom: 10px; }
+        .stats { display: flex; gap: 15px; margin-top: 15px; }
+        .stat { background: rgba(255,255,255,0.2); padding: 10px 15px; border-radius: 5px; }
+        .solicitud { background: white; border-left: 4px solid #3b82f6; padding: 20px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .solicitud h3 { font-size: 18px; color: #0f172a; margin-bottom: 8px; }
+        .solicitud p { margin: 5px 0; font-size: 14px; color: #666; }
+        .badge { display: inline-block; background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-top: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; margin: 10px 0; }
+        .field { font-size: 13px; }
+        .field strong { color: #0f172a; }
+        .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        button { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+        .btn-primary { background: #1e40af; color: white; }
+        .btn-primary:hover { background: #1e3a8a; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-refresh { background: #3b82f6; color: white; margin-bottom: 20px; }
+        .btn-refresh:hover { background: #2563eb; }
+        .loading { text-align: center; padding: 40px; color: #999; }
+        .empty { text-align: center; padding: 40px; color: #999; background: white; border-radius: 6px; }
+        .error { background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+
+        /* Modal styles */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; border-radius: 8px; padding: 30px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; }
+        .modal-header h2 { font-size: 22px; color: #0f172a; }
+        .close-btn { background: none; border: none; font-size: 28px; cursor: pointer; color: #999; }
+        .close-btn:hover { color: #333; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #0f172a; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; font-size: 14px; }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group-full { grid-column: 1 / -1; }
+        .btn-submit { background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 15px; width: 100%; }
+        .btn-submit:hover { background: #2563eb; }
+        .btn-cancel { background: #6b7280; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 15px; width: 100%; margin-top: 10px; }
+        .btn-cancel:hover { background: #4b5563; }
+        .btn-new { background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; margin-bottom: 20px; transition: all 0.2s; }
+        .btn-new:hover { background: #2563eb; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">🚚</div>
+            <div>
+                <div class="logo-text">Orión</div>
+                <div class="logo-sub">Logística</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="section-title">Operación</div>
+            <a class="menu-item active" href="/solicitudes-ui">📋 Solicitudes</a>
+            <a class="menu-item" href="/aprobaciones">✅ Aprobaciones</a>
+            <a class="menu-item" href="/flota">🚗 Flota Viva</a>
+        </div>
+
+        <div class="menu-section">
+            <div class="section-title">Monitoreo</div>
+            <a class="menu-item" href="/coming-soon">📖 Bitácora Diaria</a>
+            <a class="menu-item" href="/coming-soon">📸 Evidencias</a>
+        </div>
+
+        <div class="menu-section">
+            <div class="section-title">Administración</div>
+            <a class="menu-item" href="/coming-soon">💰 Liquidaciones</a>
+            <a class="menu-item" href="/coming-soon">📊 Reportes</a>
+        </div>
+
+        <div class="menu-section">
+            <div class="section-title">General</div>
+            <a class="menu-item" href="/">🏠 Inicio</a>
+            <a class="menu-item" href="/docs">🔌 API Docs</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>📝 Alta de Servicio / Apertura de Viaje</h1>
+            <p style="margin-top: 8px; opacity: 0.9;">Gestión de solicitudes de transporte</p>
+            <div class="stats">
+                <div class="stat">
+                    <strong>Total:</strong> <span id="total">0</span>
+                </div>
+                <div class="stat">
+                    <strong>En Revisión:</strong> <span id="revision">0</span>
+                </div>
+                <div class="stat">
+                    <strong>Aprobadas:</strong> <span id="aprobadas">0</span>
+                </div>
+            </div>
+        </header>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button class="btn-refresh" onclick="cargarSolicitudes()">🔄 Actualizar</button>
+            <button class="btn-new" onclick="abrirModalNuevaSolicitud()">➕ Nueva Solicitud</button>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="contenido"></div>
+    </div>
+
+    <!-- Modal para crear nueva solicitud -->
+    <div id="modalNueva" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Crear Nueva Solicitud</h2>
+                <button class="close-btn" onclick="cerrarModal()">&times;</button>
+            </div>
+            <form id="formNuevaSolicitud">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Empresa Cliente *</label>
+                        <input type="text" id="cliente_empresa" required placeholder="Ej: Soriana">
+                    </div>
+                    <div class="form-group">
+                        <label>Solicitante *</label>
+                        <input type="text" id="solicitante" required placeholder="Nombre completo">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Teléfono Contacto *</label>
+                        <input type="tel" id="telefono_contacto" required placeholder="Ej: +52 1 775 123 4567">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Mercancía *</label>
+                        <input type="text" id="tipo_mercancia" required placeholder="Ej: Alimentos refrigerados">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Origen *</label>
+                        <input type="text" id="origen" required placeholder="Ej: México, CDMX">
+                    </div>
+                    <div class="form-group">
+                        <label>Destino *</label>
+                        <input type="text" id="destino" required placeholder="Ej: Veracruz, Ver.">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Peso Aproximado (kg) *</label>
+                        <input type="number" id="peso_aproximado" required placeholder="2000" min="1" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>KM Cargados *</label>
+                        <input type="number" id="km_cargados" required placeholder="450" min="1" step="0.01">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fecha de Carga *</label>
+                        <input type="datetime-local" id="fecha_carga" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Hora Carga *</label>
+                        <input type="text" id="hora_carga" required placeholder="08:30 a.m.">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Temperatura Requerida</label>
+                        <input type="text" id="temperatura_requerida" placeholder="Ej: -18°C">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Unidad *</label>
+                        <select id="tipo_unidad" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="ECO 01">ECO 01</option>
+                            <option value="ECO 02">ECO 02</option>
+                            <option value="ECO 03">ECO 03</option>
+                            <option value="Thermo King 1">Thermo King 1</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="requiere_refrigeracion"> Requiere Refrigeración
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Monto Casetas *</label>
+                        <input type="number" id="monto_casetas" required placeholder="500" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Tarifa Acordada *</label>
+                        <input type="number" id="tarifa_acordada" required placeholder="5000" min="0" step="0.01">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Dirección de Entrega *</label>
+                        <input type="text" id="direccion_entrega" required placeholder="Calle, número, ciudad">
+                    </div>
+                    <div class="form-group">
+                        <label>Contacto Destino</label>
+                        <input type="text" id="contacto_destino" placeholder="Nombre/Empresa">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Teléfono Destino</label>
+                        <input type="tel" id="telefono_destino" placeholder="+52 1 ...">
+                    </div>
+                    <div class="form-group">
+                        <label>Condiciones de Pago</label>
+                        <input type="text" id="condiciones_pago" placeholder="Ej: 30 Días">
+                    </div>
+                </div>
+
+                <div class="form-group form-group-full">
+                    <label>Observaciones</label>
+                    <textarea id="observaciones" placeholder="Notas adicionales..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit">✅ Crear Solicitud</button>
+                <button type="button" class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/solicitudes/revision';
+        const API_CREATE_URL = 'http://localhost:8000/api/solicitudes/recepcion-n8n';
+
+        // Modal functions
+        function abrirModalNuevaSolicitud() {
+            document.getElementById('modalNueva').classList.add('show');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalNueva').classList.remove('show');
+            document.getElementById('formNuevaSolicitud').reset();
+        }
+
+        // Cerrar modal al hacer click fuera
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('modalNueva');
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    cerrarModal();
+                }
+            });
+
+            // Manejar submit del formulario
+            document.getElementById('formNuevaSolicitud').addEventListener('submit', crearSolicitud);
+        });
+
+        async function cargarSolicitudes() {
+            const contenido = document.getElementById('contenido');
+            contenido.innerHTML = '<div class="loading">⏳ Cargando solicitudes...</div>';
+
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Error al cargar');
+                
+                const solicitudes = await response.json();
+                
+                document.getElementById('total').textContent = solicitudes.length;
+                document.getElementById('revision').textContent = solicitudes.filter(s => s.estatus === 'revision_mariel').length;
+                document.getElementById('aprobadas').textContent = solicitudes.filter(s => s.estatus === 'aprobado').length;
+                document.getElementById('error').style.display = 'none';
+
+                if (solicitudes.length === 0) {
+                    contenido.innerHTML = '<div class="empty">✅ No hay solicitudes pendientes</div>';
+                    return;
+                }
+
+                contenido.innerHTML = solicitudes.map(s => `
+                    <div class="solicitud">
+                        <h3>${s.folio}</h3>
+                        <p><strong>${s.cliente_empresa}</strong></p>
+                        <span class="badge">⏳ ${s.estatus === 'revision_mariel' ? 'En Revisión' : 'Aprobado'}</span>
+                        
+                        <div class="grid" style="margin-top: 15px;">
+                            <div class="field"><strong>Solicitante:</strong> ${s.solicitante}</div>
+                            <div class="field"><strong>Teléfono:</strong> ${s.telefono_contacto}</div>
+                            <div class="field"><strong>Ruta:</strong> ${s.origen} → ${s.destino}</div>
+                            <div class="field"><strong>Mercancía:</strong> ${s.tipo_mercancia}</div>
+                            <div class="field"><strong>Peso:</strong> ${s.peso_aproximado} kg</div>
+                            <div class="field"><strong>Tarifa:</strong> $${s.tarifa_acordada.toLocaleString()}</div>
+                            <div class="field"><strong>Dirección:</strong> ${s.direccion_entrega}</div>
+                            <div class="field"><strong>Fecha Carga:</strong> ${new Date(s.fecha_carga).toLocaleDateString('es-MX')}</div>
+                        </div>
+
+                        <div class="buttons">
+                            <button class="btn-primary" onclick="editarSolicitud('${s.id}')">✏️ Editar</button>
+                            ${s.estatus === 'revision_mariel' ? 
+                                `<button class="btn-success" onclick="aprobarSolicitud('${s.id}')">✅ Aprobar</button>` :
+                                ''}
+                            <button class="btn-danger" onclick="eliminarSolicitud('${s.id}')">🗑️ Eliminar</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error(error);
+                document.getElementById('error').textContent = 'Error: ' + error.message;
+                document.getElementById('error').style.display = 'block';
+                contenido.innerHTML = '<div class="empty">❌ Error cargando solicitudes</div>';
+            }
+        }
+
+        async function aprobarSolicitud(id) {
+            if (!confirm('¿Aprobar esta solicitud?')) return;
+            try {
+                const res = await fetch(`http://localhost:8000/api/solicitudes/${id}/aprobar`, { method: 'POST' });
+                if (res.ok) {
+                    alert('✅ Solicitud aprobada');
+                    cargarSolicitudes();
+                }
+            } catch (e) { alert('❌ Error: ' + e.message); }
+        }
+
+        async function eliminarSolicitud(id) {
+            if (!confirm('¿Eliminar esta solicitud?')) return;
+            try {
+                const res = await fetch(`http://localhost:8000/api/solicitudes/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    alert('✅ Solicitud eliminada');
+                    cargarSolicitudes();
+                }
+            } catch (e) { alert('❌ Error: ' + e.message); }
+        }
+
+        function editarSolicitud(id) {
+            alert('Edición: Próximamente (por ahora revisa en el backend)');
+        }
+
+        async function crearSolicitud(e) {
+            e.preventDefault();
+
+            // Construir folio automático
+            const fecha = new Date();
+            const folio = `SOL-${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}-${String(Math.random() * 10000).split('.')[0].padStart(4, '0')}`;
+
+            // Convertir fecha_carga al formato DateTime
+            const fechaCargaStr = document.getElementById('fecha_carga').value;
+            const fechaCarga = new Date(fechaCargaStr).toISOString();
+
+            // Datos del formulario - NOTA: El backend espera strings para ciertos campos
+            const nuevoSolicitud = {
+                folio: folio,
+                fecha_solicitud: new Date().toISOString(),
+                cliente_empresa: document.getElementById('cliente_empresa').value,
+                solicitante: document.getElementById('solicitante').value,
+                telefono_contacto: document.getElementById('telefono_contacto').value,
+                origen: document.getElementById('origen').value,
+                destino: document.getElementById('destino').value,
+                fecha_carga: fechaCarga,
+                hora_carga: document.getElementById('hora_carga').value,
+                dias_operacion: 1, // Por defecto
+                km_cargados: parseFloat(document.getElementById('km_cargados').value),
+                tipo_mercancia: document.getElementById('tipo_mercancia').value,
+                requiere_refrigeracion: document.getElementById('requiere_refrigeracion').checked ? "SI" : "NO",
+                temperatura_requerida: document.getElementById('temperatura_requerida').value || null,
+                peso_aproximado: String(document.getElementById('peso_aproximado').value),
+                tipo_unidad: document.getElementById('tipo_unidad').value,
+                direccion_entrega: document.getElementById('direccion_entrega').value,
+                contacto_destino: document.getElementById('contacto_destino').value || null,
+                telefono_destino: document.getElementById('telefono_destino').value || null,
+                monto_casetas: parseFloat(document.getElementById('monto_casetas').value),
+                condiciones_pago: document.getElementById('condiciones_pago').value || "Contado",
+                tarifa_acordada: parseFloat(document.getElementById('tarifa_acordada').value),
+                observaciones: document.getElementById('observaciones').value || null,
+                cita_descarga: null
+            };
+
+            try {
+                const res = await fetch(API_CREATE_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(nuevoSolicitud)
+                });
+
+                if (res.ok) {
+                    alert('✅ Solicitud creada correctamente');
+                    cerrarModal();
+                    cargarSolicitudes();
+                } else {
+                    const error = await res.text();
+                    alert('❌ Error: ' + error);
+                }
+            } catch (e) {
+                alert('❌ Error al crear: ' + e.message);
+            }
+        }
+
+        // Cargar al iniciar
+        cargarSolicitudes();
+        // Actualizar cada 10 segundos
+        setInterval(cargarSolicitudes, 10000);
+    </script>
+</body>
+</html>

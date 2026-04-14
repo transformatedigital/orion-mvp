@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flota Viva - Orión</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f3f4f6; color: #333; }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: #0f172a;
+            color: white;
+            overflow-y: auto;
+        }
+
+        .logo {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: #3b82f6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .logo-text { font-size: 18px; font-weight: bold; }
+        .logo-sub { font-size: 12px; opacity: 0.7; }
+
+        .menu-section {
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .section-title {
+            padding: 10px 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            opacity: 0.6;
+            letter-spacing: 1px;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            display: block;
+            color: white;
+            text-decoration: none;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3b82f6;
+        }
+
+        .menu-item.active {
+            background: rgba(59, 130, 246, 0.2);
+            border-left-color: #3b82f6;
+            color: #93c5fd;
+        }
+
+        .container { margin-left: 280px; max-width: none; padding: 20px; }
+        header { background: #0f172a; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        h1 { font-size: 28px; margin-bottom: 10px; }
+        .kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .kpi-card { background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 6px; border-left: 4px solid #3b82f6; }
+        .kpi-label { font-size: 12px; opacity: 0.8; text-transform: uppercase; }
+        .kpi-value { font-size: 28px; font-weight: bold; margin-top: 5px; }
+
+        .viaje { background: white; border-left: 4px solid #3b82f6; padding: 20px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .viaje h3 { font-size: 18px; color: #0f172a; margin-bottom: 8px; }
+        .viaje p { margin: 5px 0; font-size: 14px; color: #666; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .status-en-ruta { background: #d1fae5; color: #065f46; }
+        .status-completado { background: #dbeafe; color: #1e40af; }
+        .status-detenido { background: #fef3c7; color: #92400e; }
+        .status-incidencia { background: #fee2e2; color: #991b1b; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; margin: 10px 0; }
+        .field { font-size: 13px; }
+        .field strong { color: #0f172a; }
+        .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        button { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+        .btn-primary { background: #1e40af; color: white; }
+        .btn-primary:hover { background: #1e3a8a; }
+        .btn-refresh { background: #3b82f6; color: white; margin-bottom: 20px; }
+        .btn-refresh:hover { background: #2563eb; }
+        .loading { text-align: center; padding: 40px; color: #999; }
+        .empty { text-align: center; padding: 40px; color: #999; background: white; border-radius: 6px; }
+        .error { background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">🚚</div>
+            <div>
+                <div class="logo-text">Orión</div>
+                <div class="logo-sub">Logística</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="section-title">Operación</div>
+            <a class="menu-item" href="/solicitudes-ui">📋 Solicitudes</a>
+            <a class="menu-item" href="/aprobaciones">✅ Aprobaciones</a>
+            <a class="menu-item active" href="/flota">🚗 Flota Viva</a>
+        </div>
+
+        <div class="menu-section">
+            <div class="section-title">Monitoreo</div>
+            <a class="menu-item" href="/coming-soon">📖 Bitácora Diaria</a>
+            <a class="menu-item" href="/coming-soon">📸 Evidencias</a>
+        </div>
+
+        <div class="menu-section">
+            <div class="section-title">Administración</div>
+            <a class="menu-item" href="/coming-soon">💰 Liquidaciones</a>
+            <a class="menu-item" href="/coming-soon">📊 Reportes</a>
+        </div>
+
+        <div class="menu-section">
+            <div class="section-title">General</div>
+            <a class="menu-item" href="/">🏠 Inicio</a>
+            <a class="menu-item" href="/docs">🔌 API Docs</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>🚗 Flota en Vivo</h1>
+            <p style="margin-top: 8px; opacity: 0.9;">Monitoreo en tiempo real de viajes activos</p>
+            <div class="kpi">
+                <div class="kpi-card">
+                    <div class="kpi-label">En Ruta</div>
+                    <div class="kpi-value" id="en-ruta">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Completados</div>
+                    <div class="kpi-value" id="completados">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Incidencias</div>
+                    <div class="kpi-value" id="incidencias">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Viajes</div>
+                    <div class="kpi-value" id="total">0</div>
+                </div>
+            </div>
+        </header>
+
+        <button class="btn-refresh" onclick="cargarViajes()">🔄 Actualizar</button>
+
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="contenido"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/viajes';
+
+        function getStatusClass(estatus) {
+            if (estatus === 'en_ruta') return 'status-en-ruta';
+            if (estatus === 'completado') return 'status-completado';
+            if (estatus === 'detenido') return 'status-detenido';
+            if (estatus === 'con_incidencia') return 'status-incidencia';
+            return 'status-en-ruta';
+        }
+
+        function getStatusLabel(estatus) {
+            const labels = {
+                'en_ruta': 'En Ruta',
+                'completado': 'Completado',
+                'detenido': 'Detenido',
+                'con_incidencia': 'Incidencia',
+                'en_destino': 'En Destino'
+            };
+            return labels[estatus] || estatus;
+        }
+
+        async function cargarViajes() {
+            const contenido = document.getElementById('contenido');
+            contenido.innerHTML = '<div class="loading">⏳ Cargando flota...</div>';
+
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Error al cargar');
+
+                const viajes = await response.json();
+
+                // Calcular KPIs
+                const enRuta = viajes.filter(v => v.estatus === 'en_ruta').length;
+                const completados = viajes.filter(v => v.estatus === 'completado').length;
+                const incidencias = viajes.filter(v => ['con_incidencia', 'detenido'].includes(v.estatus)).length;
+
+                document.getElementById('en-ruta').textContent = enRuta;
+                document.getElementById('completados').textContent = completados;
+                document.getElementById('incidencias').textContent = incidencias;
+                document.getElementById('total').textContent = viajes.length;
+                document.getElementById('error').style.display = 'none';
+
+                if (viajes.length === 0) {
+                    contenido.innerHTML = '<div class="empty">📭 No hay viajes registrados</div>';
+                    return;
+                }
+
+                contenido.innerHTML = viajes.map(v => `
+                    <div class="viaje">
+                        <h3>${v.unidad || 'Unidad ' + (v.viaje_id || 'N/A')}</h3>
+                        <p><strong>${v.cliente || 'Cliente'}</strong> • ${v.placa || 'SIN PLACA'}</p>
+                        <span class="status-badge ${getStatusClass(v.estatus)}">
+                            ${getStatusLabel(v.estatus)}
+                        </span>
+
+                        <div class="grid" style="margin-top: 15px;">
+                            <div class="field"><strong>Operador:</strong> ${v.operador || 'N/A'}</div>
+                            <div class="field"><strong>Teléfono:</strong> ${v.telefono || 'N/A'}</div>
+                            <div class="field"><strong>Ruta:</strong> ${v.origen} → ${v.destino}</div>
+                            <div class="field"><strong>Tipo Carga:</strong> ${v.tipo_carga || 'N/A'}</div>
+                            <div class="field"><strong>Fecha Inicio:</strong> ${v.fecha_inicio ? new Date(v.fecha_inicio).toLocaleDateString('es-MX') : 'N/A'}</div>
+                            <div class="field"><strong>Documentos:</strong> ${v.checklist_documental_pct || 0}%</div>
+                        </div>
+
+                        ${v.incidencias_abiertas > 0 ? `
+                            <div style="background: #fee2e2; padding: 10px; border-radius: 5px; margin-top: 10px; color: #991b1b; font-size: 13px;">
+                                ⚠️ <strong>${v.incidencias_abiertas}</strong> incidencia(s) abierta(s)
+                            </div>
+                        ` : ''}
+
+                        <div class="buttons">
+                            <button class="btn-primary" onclick="verDetalle('${v.viaje_id}')">👁️ Ver Detalle</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error(error);
+                document.getElementById('error').textContent = 'Error: ' + error.message;
+                document.getElementById('error').style.display = 'block';
+                contenido.innerHTML = '<div class="empty">❌ Error cargando flota</div>';
+            }
+        }
+
+        function verDetalle(id) {
+            alert('Detalle del viaje: ' + id);
+        }
+
+        // Cargar al iniciar
+        cargarViajes();
+        // Actualizar cada 8 segundos
+        setInterval(cargarViajes, 8000);
+    </script>
+</body>
+</html>

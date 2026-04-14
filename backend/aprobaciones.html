@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprobaciones - Orión</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f3f4f6; color: #333; }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: #0f172a;
+            color: white;
+            overflow-y: auto;
+        }
+
+        .logo {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: #3b82f6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .logo-text { font-size: 18px; font-weight: bold; }
+        .logo-sub { font-size: 12px; opacity: 0.7; }
+
+        .menu-section {
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .section-title {
+            padding: 10px 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            opacity: 0.6;
+            letter-spacing: 1px;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            display: block;
+            color: white;
+            text-decoration: none;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3b82f6;
+        }
+
+        .menu-item.active {
+            background: rgba(59, 130, 246, 0.2);
+            border-left-color: #3b82f6;
+            color: #93c5fd;
+        }
+
+        .container { margin-left: 280px; max-width: none; padding: 20px; }
+        header { background: #0f172a; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        h1 { font-size: 28px; margin-bottom: 10px; }
+        .stats { display: flex; gap: 15px; margin-top: 15px; }
+        .stat { background: rgba(255,255,255,0.2); padding: 10px 15px; border-radius: 5px; }
+
+        .aprobacion { background: white; border-left: 4px solid #3b82f6; padding: 20px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .aprobacion h3 { font-size: 18px; color: #0f172a; margin-bottom: 8px; }
+        .aprobacion p { margin: 5px 0; font-size: 14px; color: #666; }
+        .badge { display: inline-block; background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-top: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; margin: 10px 0; }
+        .field { font-size: 13px; }
+        .field strong { color: #0f172a; }
+        .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        button { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+        .btn-primary { background: #1e40af; color: white; }
+        .btn-primary:hover { background: #1e3a8a; }
+        .btn-refresh { background: #3b82f6; color: white; margin-bottom: 20px; }
+        .btn-refresh:hover { background: #2563eb; }
+        .loading { text-align: center; padding: 40px; color: #999; }
+        .empty { text-align: center; padding: 40px; color: #999; background: white; border-radius: 6px; }
+        .error { background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+
+        .approval-status {
+            background: #d1fae5;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #065f46;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">🚚</div>
+            <div>
+                <div class="logo-text">Orión</div>
+                <div class="logo-sub">Logística</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="section-title">Operación</div>
+            <a class="menu-item" href="/solicitudes-ui">📋 Solicitudes</a>
+            <a class="menu-item active" href="/aprobaciones">✅ Aprobaciones</a>
+            <a class="menu-item" href="/flota">🚗 Flota Viva</a>
+        </div>
+
+        <div class="menu-section">
+            <div class="section-title">Monitoreo</div>
+            <a class="menu-item" href="/coming-soon">📖 Bitácora Diaria</a>
+            <a class="menu-item" href="/coming-soon">📸 Evidencias</a>
+        </div>
+
+        <div class="menu-section">
+            <div class="section-title">Administración</div>
+            <a class="menu-item" href="/coming-soon">💰 Liquidaciones</a>
+            <a class="menu-item" href="/coming-soon">📊 Reportes</a>
+        </div>
+
+        <div class="menu-section">
+            <div class="section-title">General</div>
+            <a class="menu-item" href="/">🏠 Inicio</a>
+            <a class="menu-item" href="/docs">🔌 API Docs</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>✅ Solicitudes Aprobadas</h1>
+            <p style="margin-top: 8px; opacity: 0.9;">Listado de solicitudes que han sido aprobadas</p>
+            <div class="stats">
+                <div class="stat">
+                    <strong>Total Aprobadas:</strong> <span id="total">0</span>
+                </div>
+            </div>
+        </header>
+
+        <button class="btn-refresh" onclick="cargarAprobaciones()">🔄 Actualizar</button>
+
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="contenido"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/solicitudes/aprobadas';
+
+        async function cargarAprobaciones() {
+            const contenido = document.getElementById('contenido');
+            contenido.innerHTML = '<div class="loading">⏳ Cargando aprobaciones...</div>';
+
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Error al cargar');
+
+                const aprobaciones = await response.json();
+
+                document.getElementById('total').textContent = aprobaciones.length;
+                document.getElementById('error').style.display = 'none';
+
+                if (aprobaciones.length === 0) {
+                    contenido.innerHTML = '<div class="empty">✅ No hay solicitudes aprobadas</div>';
+                    return;
+                }
+
+                contenido.innerHTML = aprobaciones.map(a => `
+                    <div class="aprobacion">
+                        <h3>${a.folio}</h3>
+                        <p><strong>${a.cliente_empresa}</strong></p>
+                        <span class="badge">✅ Aprobada</span>
+
+                        <div class="grid" style="margin-top: 15px;">
+                            <div class="field"><strong>Solicitante:</strong> ${a.solicitante}</div>
+                            <div class="field"><strong>Teléfono:</strong> ${a.telefono_contacto}</div>
+                            <div class="field"><strong>Ruta:</strong> ${a.origen} → ${a.destino}</div>
+                            <div class="field"><strong>Mercancía:</strong> ${a.tipo_mercancia}</div>
+                            <div class="field"><strong>Peso:</strong> ${a.peso_aproximado} kg</div>
+                            <div class="field"><strong>Tarifa:</strong> $${a.tarifa_acordada.toLocaleString()}</div>
+                            <div class="field"><strong>Dirección:</strong> ${a.direccion_entrega}</div>
+                            <div class="field"><strong>Fecha Carga:</strong> ${new Date(a.fecha_carga).toLocaleDateString('es-MX')}</div>
+                        </div>
+
+                        <div class="approval-status">
+                            <strong>✅ Aprobada por:</strong> ${a.revisado_por || 'Sistema'}<br>
+                            <strong>Fecha de aprobación:</strong> ${a.fecha_revision ? new Date(a.fecha_revision).toLocaleString('es-MX') : 'N/A'}
+                        </div>
+
+                        <div class="buttons">
+                            <button class="btn-primary" onclick="verDetalle('${a.id}')">👁️ Ver Detalle</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error(error);
+                document.getElementById('error').textContent = 'Error: ' + error.message;
+                document.getElementById('error').style.display = 'block';
+                contenido.innerHTML = '<div class="empty">❌ Error cargando aprobaciones</div>';
+            }
+        }
+
+        function verDetalle(id) {
+            alert('Detalle: ID ' + id);
+        }
+
+        // Cargar al iniciar
+        cargarAprobaciones();
+        // Actualizar cada 30 segundos
+        setInterval(cargarAprobaciones, 30000);
+    </script>
+</body>
+</html>

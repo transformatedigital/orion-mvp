@@ -18,7 +18,7 @@ def ts(dt: datetime | None) -> str | None:
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, StreamingResponse
+from fastapi.responses import Response, StreamingResponse, FileResponse
 from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -562,3 +562,32 @@ def listar_operadores(db: Session = Depends(get_db)):
         }
         for o in ops
     ]
+
+
+# ============================================================================
+# HTML PAGES - Formulario Cryo y Dashboards
+# ============================================================================
+
+@app.get("/cryo")
+def cryo_portal():
+    return FileResponse("index_cryo.html", media_type="text/html")
+
+@app.get("/solicitudes-ui")
+def solicitudes_ui():
+    return FileResponse("solicitudes.html", media_type="text/html")
+
+@app.get("/aprobaciones")
+def aprobaciones():
+    return FileResponse("aprobaciones.html", media_type="text/html")
+
+@app.get("/flota")
+def flota():
+    return FileResponse("flota.html", media_type="text/html")
+
+@app.get("/")
+def home():
+    return FileResponse("index.html", media_type="text/html")
+
+@app.get("/coming-soon")
+def coming_soon():
+    return FileResponse("coming-soon.html", media_type="text/html")
